@@ -78,6 +78,9 @@
         _remoteSideClosed = NO;
         _receivedReply = NO;
         _dataDelegate = delegate;
+        
+        //nanpo.yhl
+        _multiData = [[NSMutableData alloc]init];
     }
     return self;
 }
@@ -155,6 +158,10 @@
 {
     _localSideClosed = localSideClosed;
     if (_localSideClosed && _remoteSideClosed && _client) {
+        
+        //nanpo.yhl
+        [_client URLProtocol: _protocol didLoadData:[_multiData copy]];
+        
         [_client URLProtocolDidFinishLoading:_protocol];
     }
 }
@@ -163,6 +170,10 @@
 {
     _remoteSideClosed = remoteSideClosed;
     if (_localSideClosed && _remoteSideClosed && _client) {
+        
+        //nanpo.yhl
+        [_client URLProtocol: _protocol didLoadData:[_multiData copy]];
+        
         [_client URLProtocolDidFinishLoading:_protocol];
     }
 }
@@ -356,8 +367,14 @@
 
             NSMutableData *inflatedData = [[NSMutableData alloc] initWithBytesNoCopy:inflatedBytes length:DECOMPRESSED_CHUNK_LENGTH freeWhenDone:YES];
             inflatedData.length = DECOMPRESSED_CHUNK_LENGTH - _zlibStream.avail_out;
-            [_client URLProtocol:_protocol didLoadData:inflatedData];
-
+            
+            //[_client URLProtocol:_protocol didLoadData:inflatedData];
+            
+            //nanpo.yhl
+            /* instead of [_client URLProtocol:_protocol didLoadData:inflatedData];
+             */
+            [_multiData appendData:data];
+            
             // This can happen if the decompressed data is size N * DECOMPRESSED_CHUNK_LENGTH,
             // in which case we had to make an additional call to inflate() despite there being
             // no more input to ensure there wasn't any pending output in the zlib stream.
@@ -375,7 +392,10 @@
             [_client URLProtocol:_protocol didFailWithError:error];
         }
     } else {
-        [_client URLProtocol:_protocol didLoadData:[data copy]];
+        //nanpo.yhl
+        [_multiData appendData:data];
+        
+        //[_client URLProtocol:_protocol didLoadData:[data copy]];
     }
 }
 

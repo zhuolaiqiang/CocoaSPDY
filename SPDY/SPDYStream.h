@@ -24,6 +24,9 @@
 @property (nonatomic, weak) id<NSURLProtocolClient> client;
 @property (nonatomic, weak) id<SPDYStreamDataDelegate> dataDelegate;
 @property (nonatomic) NSData *data;
+//nanpo.yhl
+@property (nonatomic,strong) NSMutableData *multiData;
+
 @property (nonatomic) NSInputStream *dataStream;
 @property (nonatomic, weak) NSURLRequest *request;
 @property (nonatomic, weak) SPDYProtocol *protocol;

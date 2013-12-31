@@ -141,17 +141,28 @@ static dispatch_once_t initialized;
 static dispatch_queue_t originQueue;
 static NSMutableSet *origins;
 
-+ (void)load
-{
-    // +[NSURLProtocol registerClass] is not threadsafe, so register before
-    // requests start getting made.
-    @autoreleasepool {
-        [NSURLProtocol registerClass:self];
-    }
-}
+//4.3会crash
+//+ (void)load
+//{
+//    // +[NSURLProtocol registerClass] is not threadsafe, so register before
+//    // requests start getting made.
+//    @autoreleasepool {
+//        [NSURLProtocol registerClass:self];
+//    }
+//}
 
 + (void)initialize
 {
+    float version = [[UIDevice currentDevice].systemVersion floatValue];//判定系统版本。
+    if (version < 6.0)
+    {
+        return;
+    }
+    
+    @autoreleasepool {
+        [NSURLProtocol registerClass:self];
+    }
+    
     dispatch_once(&initialized, ^{
         origins = [[NSMutableSet alloc] init];
         originQueue = dispatch_queue_create(SPDYOriginQueue, DISPATCH_QUEUE_CONCURRENT);
@@ -160,6 +171,12 @@ static NSMutableSet *origins;
 
 + (void)registerOrigin:(NSString *)originString
 {
+    float version = [[UIDevice currentDevice].systemVersion floatValue];//判定系统版本。
+    if (version < 6.0)
+    {
+        return;
+    }
+    
     SPDYOrigin *origin = [[SPDYOrigin alloc] initWithString:originString error:nil];
     SPDY_INFO(@"register origin: %@", origin);
     dispatch_barrier_async(originQueue, ^{
@@ -194,6 +211,12 @@ static NSMutableSet *origins;
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
+    float version = [[UIDevice currentDevice].systemVersion floatValue];//判定系统版本。
+    if (version < 6.0)
+    {
+        return NO;
+    }
+    
     if (![super canInitWithRequest:request]) {
         return NO;
     }
